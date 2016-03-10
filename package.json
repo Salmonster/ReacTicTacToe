@@ -1,0 +1,27 @@
+{
+  "name": "ReacTicTacToe",
+  "version": "1.0.0",
+  "description": "Tic-Tac-Toe built using ReactJS",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/nodemon server/server.js --ignore node_modules/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GitCats/ReacTicTacToe"
+  },
+  "author": "Salman Oskooi <soskooi@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/GitCats/ReacTicTacToe#readme",
+  "bugs": {
+    "url": "https://github.com/GitCats/ReacTicTacToe/issues"
+  },
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.3",
+    "morgan": "^1.6.1",
+    "nodemon": "^1.8.1"
+  }
+}
