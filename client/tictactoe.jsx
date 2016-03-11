@@ -1,9 +1,7 @@
 var Tictactoe = React.createClass({
 
   getInitialState: function() {
-
     var updateSpace = function(index) {
-      console.log("updateSpace function called on " + index)
       var newSpaces = this.state.spaces;
       if (this.state.currentPlayer === 'Player 1') {
         newSpaces[index] = this.state.player1;
@@ -11,19 +9,27 @@ var Tictactoe = React.createClass({
         newSpaces[index] = this.state.player2;
       }
       this.setState({spaces: newSpaces});
-
-      // TODO: Call AJAX here to determine whether someone won
-      // if (res.data === 'won') {
-      //   this.onGameWin(this.state.currentPlayer);
-      //   this.setState({gameOver: true});
-      // } else { 
-      //   this.setNextTurn();
-      // }
-      this.setNextTurn();
+      $.ajax({
+        url: 'pick',
+        type: 'POST',
+        dataType: 'text',
+        data: { board: newSpaces, index: index, playedBy: newSpaces[index] },
+        success: function(res) {
+          if (res === 'Accepted') {
+            this.onGameWin(this.state.currentPlayer);
+            this.setState({gameOver: true});
+          } else if (res === undefined) {
+            alert('The game is a draw');
+          } else { 
+            this.setNextTurn();
+          }
+        }.bind(this),
+        error: function(xhr, status, err) {
+          console.error('pick', status, err.toString());
+        }.bind(this)
+      });      
     };
-
     var n = 'img/tile.jpg';
-
     return {
       spaces: [
         n, n, n,
@@ -87,7 +93,6 @@ var Tictactoe = React.createClass({
 
 var Squares = React.createClass({
 
-  // TODO: Handle gameOver
   selectBox: function() {
     var spaces = this.props.spaces;
     var index = this.props.index;
@@ -97,8 +102,8 @@ var Squares = React.createClass({
     var updateSpace = this.props.updateSpace;
     if (spaces[index] !== player1 && spaces[index] !== player2 && gameOver !== true) {
       updateSpace(index);
-    // } else if (gameOver === true) {
-    //   alert('Game over');
+    } else if (gameOver === true) {
+      alert('Game over, refresh the page for a new game');
     } else {
       alert('This space is already taken');
     }
