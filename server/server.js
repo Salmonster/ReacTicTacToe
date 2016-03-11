@@ -12,7 +12,23 @@ routes.use(express.static(assetFolder));
 routes.post('/pick', function(req, res) {
   // put the checkForWinner logic here to measure the array/state values in req.body and return
   // a different value for each response you might trigger (setNextTurn, onGameWin, alert Game Over,
-  // or alert Space is Taken)
+  // or alert Space is Taken) -- SHOULD SUPPORT NxN GAME BOARD
+  var checkForWinner = function () {
+    // Because (NaN === NaN) is always false, we can safely assume
+    // that if three spaces in a row are the same, all three spaces are
+    // marked by a player, and not all empty.
+    if ( spaces[0] === spaces[1] && spaces[1] === spaces[2]
+      || spaces[3] === spaces[4] && spaces[4] === spaces[5]
+      || spaces[6] === spaces[7] && spaces[7] === spaces[8]
+      // TODO: Check for rest of game winning cases
+    )
+    {
+      // TODO: Handle game winner
+      // alert('Somebody won!');
+      // onGameWin(currentPlayer);
+      // gameStatus = true;
+    }
+  };
 })
 
 
