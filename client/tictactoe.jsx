@@ -1,25 +1,4 @@
-/* 
-Render the tictactoe array in the following layout. Use states instead of or tied to 
-array indices.
-
-<h3>It's <span id='turn-label'></span>'s turn</h3>
-
-<div id='board'>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-  <div class='space'></div>
-</div>
-*/
-
 var Tictactoe = React.createClass({
-
-  // State changes would work in place of jQuery class changes.
 
   getInitialState: function() {
     // Using NaN instead of null is a clever hack. See checkForWinner in server for details.
@@ -29,10 +8,11 @@ var Tictactoe = React.createClass({
         NaN, NaN, NaN,
         NaN, NaN, NaN
       ],
-      player1: 'Player1',
-      player2: 'Player2',
-      currentPlayer: null,
-      gameStatus: false
+      player1: 'Player 1',
+      player2: 'Player 2',
+      currentPlayer: 'Player 1',
+      gameStatus: false,
+      selectBox: this.selectBox
     }
   },
 
@@ -47,9 +27,37 @@ var Tictactoe = React.createClass({
     $('#turn-label').text(currentPlayer);
   },
 
+  onGameWin: function(winner) {
+    // TODO: Alert who won the game
+    $('body').append('<p>Congrats ' + winner + ', you win!</p>');
+  },
+
+  render: function() {
+    var size = this.state.spaces.length;
+
+    var board = this.state.spaces.map(function(box, index) {
+      // In the map function, we're in the global scope
+      var boxes = [];
+      boxes.push(<Squares boxKey={index} size={size} />);
+      return (
+        boxes
+      );
+    });
+    return (
+      <div id='board' >
+        <h2>Welcome to ReacTicTacToe</h2>
+        <h3>It's {this.state.currentPlayer}'s turn.</h3>
+        {board}
+      </div>
+    );
+  }
+});
+
+var Squares = React.createClass({
+
   // TODO: Handle state changes on click, use control flow to alter view accordingly
   selectBox: function() {
-    console.log('Box selected... which one?', this);
+    console.log('Box selected... which one?', this.props.boxKey);
   },
   // $(document).on('click', '#board .space', function (e) {
   //   var spaceNum = $(e.currentTarget).index();
@@ -67,32 +75,20 @@ var Tictactoe = React.createClass({
   //   }
   // });
 
-  onGameWin: function(winner) {
-    // TODO: Alert who won the game
-    $('body').append('<p>Congrats ' + winner + ', you win!</p>');
-  },
-
   render: function() {
-    var size = this.state.spaces.length;
-    var board = this.state.spaces.map(function(box, index) {
-      var boxes = [];
-      if (index % Math.sqrt(size) !== 0) {
-        boxes.push(<div className='space' key={index} />);
-      } else {
-        // This will start a new line based on the n-dimension of the board
-        boxes.push(<div className='space' key={index} style={{clear: 'left'}} />);
-      }
+    // Each dimension of the board should be the square root of the overall size
+    if (this.props.boxKey % Math.sqrt(this.props.size) !== 0) {
       return (
-        boxes
-      );
-    });
-    return (
-      <div id='board' onClick={this.selectBox} >
-        {board}
-      </div>
-    );
+        <div className='space' onClick={this.selectBox} />
+      )
+    } else {
+    // This will start a new line based on the n-dimension of the board
+      return (
+        <div className='space' onClick={this.selectBox} style={{clear: 'left'}} />
+      )
+    }
   }
-});
+})
 
 
 ReactDOM.render((
