@@ -1,47 +1,79 @@
 var Tictactoe = React.createClass({
 
   getInitialState: function() {
-    // Using NaN instead of null is a clever hack. See checkForWinner in server for details.
+
+    var updateSpace = function(index) {
+      console.log("updateSpace function called on " + index)
+      var newSpaces = this.state.spaces;
+      if (this.state.currentPlayer === 'Player 1') {
+        newSpaces[index] = this.state.player1;
+      } else {
+        newSpaces[index] = this.state.player2;
+      }
+      this.setState({spaces: newSpaces});
+
+      // TODO: Call AJAX here to determine whether someone won
+      // if (res.data === 'won') {
+      //   this.onGameWin(this.state.currentPlayer);
+      //   this.setState({gameOver: true});
+      // } else { 
+      //   this.setNextTurn();
+      // }
+      this.setNextTurn();
+    };
+
+    var n = 'img/tile.jpg';
+
     return {
       spaces: [
-        NaN, NaN, NaN,
-        NaN, NaN, NaN,
-        NaN, NaN, NaN
+        n, n, n,
+        n, n, n,
+        n, n, n
       ],
-      player1: 'Player 1',
-      player2: 'Player 2',
+      player1: 'img/x.jpg',
+      player2: 'img/o.jpg',
       currentPlayer: 'Player 1',
-      gameStatus: false,
-      selectBox: this.selectBox
+      gameOver: false,
+      updateSpace: updateSpace.bind(this)
     }
   },
 
   setNextTurn: function() {
-    if (this.state.currentPlayer === this.state.player1) {
-      this.setState({ currentPlayer: this.state.player2 });
+    if (this.state.currentPlayer === 'Player 1') {
+      this.setState({ currentPlayer: 'Player 2' });
     } else {
-      this.setState({ currentPlayer: this.state.player1 });
+      this.setState({ currentPlayer: 'Player 1' });
     }
-    // TODO: changing the state of currentPlayer should trigger a view re-render
-    //       make sure the rendered box (element) has selectBox as onChange handler
-    $('#turn-label').text(currentPlayer);
   },
 
   onGameWin: function(winner) {
-    // TODO: Alert who won the game
-    $('body').append('<p>Congrats ' + winner + ', you win!</p>');
+    alert(winner + ' won the game!');
   },
 
   render: function() {
+    var spaces = this.state.spaces;
     var size = this.state.spaces.length;
-
+    var player1 = this.state.player1;
+    var player2 = this.state.player2;
+    var currentPlayer = this.state.currentPlayer;
+    var gameOver = this.state.gameOver;
+    var updateSpace = this.state.updateSpace;
     var board = this.state.spaces.map(function(box, index) {
-      // In the map function, we're in the global scope
+      // In the map function, we're in the global scope so we have to sneak in 'this'
       var boxes = [];
-      boxes.push(<Squares boxKey={index} size={size} />);
+      boxes.push(<Squares box = {box}
+                          index={index} 
+                          size={size} 
+                          spaces={spaces}
+                          player1={player1}
+                          player2={player2}
+                          currentPlayer={currentPlayer}
+                          gameOver={gameOver}
+                          updateSpace={updateSpace} 
+                          />);
       return (
         boxes
-      );
+      )
     });
     return (
       <div id='board' >
@@ -49,46 +81,43 @@ var Tictactoe = React.createClass({
         <h3>It's {this.state.currentPlayer}'s turn.</h3>
         {board}
       </div>
-    );
+    )
   }
 });
 
 var Squares = React.createClass({
 
-  // TODO: Handle state changes on click, use control flow to alter view accordingly
+  // TODO: Handle gameOver
   selectBox: function() {
-    console.log('Box selected... which one?', this.props.boxKey);
+    var spaces = this.props.spaces;
+    var index = this.props.index;
+    var player1 = this.props.player1;
+    var player2 = this.props.player2;
+    var gameOver = this.props.gameOver;
+    var updateSpace = this.props.updateSpace;
+    if (spaces[index] !== player1 && spaces[index] !== player2 && gameOver !== true) {
+      updateSpace(index);
+    // } else if (gameOver === true) {
+    //   alert('Game over');
+    } else {
+      alert('This space is already taken');
+    }
   },
-  // $(document).on('click', '#board .space', function (e) {
-  //   var spaceNum = $(e.currentTarget).index();
-  //   console.log('You clicked on space #' + spaceNum);
-  //   if(spaces[spaceNum] !== player1 && spaces[spaceNum] !== player2 && gameStatus !== true) {
-  //   // Marks the space with the current player's name
-  //   $('#board .space:eq(' + spaceNum + ')').addClass(currentPlayer);
-  //   spaces[spaceNum] = currentPlayer;
-  //   checkForWinner();
-  //   setNextTurn();
-  //   } else if (gameStatus === true) {
-  //     alert('Game over');
-  //   } else {
-  //     alert('This space is already taken');
-  //   }
-  // });
 
   render: function() {
     // Each dimension of the board should be the square root of the overall size
-    if (this.props.boxKey % Math.sqrt(this.props.size) !== 0) {
+    if (this.props.index % Math.sqrt(this.props.size) !== 0) {
       return (
-        <div className='space' onClick={this.selectBox} />
+        <img src={this.props.box} className='space' onClick={this.selectBox} />
       )
     } else {
     // This will start a new line based on the n-dimension of the board
       return (
-        <div className='space' onClick={this.selectBox} style={{clear: 'left'}} />
+        <img src={this.props.box} className='space' onClick={this.selectBox} style={{clear: 'left'}} />
       )
     }
   }
-})
+});
 
 
 ReactDOM.render((
