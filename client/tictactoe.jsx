@@ -1,34 +1,6 @@
 var Tictactoe = React.createClass({
 
   getInitialState: function() {
-    var updateSpace = function(index) {
-      var newSpaces = this.state.spaces;
-      if (this.state.currentPlayer === 'Player 1') {
-        newSpaces[index] = this.state.player1;
-      } else {
-        newSpaces[index] = this.state.player2;
-      }
-      this.setState({spaces: newSpaces});
-      $.ajax({
-        url: 'pick',
-        type: 'POST',
-        dataType: 'text',
-        data: { board: newSpaces, index: index, playedBy: newSpaces[index] },
-        success: function(res) {
-          if (res === 'Accepted') {
-            this.onGameWin(this.state.currentPlayer);
-            this.setState({gameOver: true});
-          } else if (res === undefined) {
-            alert('The game is a draw');
-          } else { 
-            this.setNextTurn();
-          }
-        }.bind(this),
-        error: function(xhr, status, err) {
-          console.error('pick', status, err.toString());
-        }.bind(this)
-      });      
-    };
     var n = 'img/tile.jpg';
     return {
       spaces: [
@@ -39,8 +11,7 @@ var Tictactoe = React.createClass({
       player1: 'img/x.jpg',
       player2: 'img/o.jpg',
       currentPlayer: 'Player 1',
-      gameOver: false,
-      updateSpace: updateSpace.bind(this)
+      gameOver: false
     }
   },
 
@@ -56,6 +27,35 @@ var Tictactoe = React.createClass({
     alert(winner + ' won the game!');
   },
 
+  updateSpace: function(index) {
+    var newSpaces = this.state.spaces;
+    if (this.state.currentPlayer === 'Player 1') {
+      newSpaces[index] = this.state.player1;
+    } else {
+      newSpaces[index] = this.state.player2;
+    }
+    this.setState({spaces: newSpaces});
+    $.ajax({
+      url: 'pick',
+      type: 'POST',
+      dataType: 'text',
+      data: { board: newSpaces, index: index, playedBy: newSpaces[index] },
+      success: function(res) {
+        if (res === 'Accepted') {
+          this.onGameWin(this.state.currentPlayer);
+          this.setState({gameOver: true});
+        } else if (res === undefined) {
+          alert('The game is a draw');
+        } else { 
+          this.setNextTurn();
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error('pick', status, err.toString());
+      }.bind(this)
+    });      
+  },
+
   render: function() {
     var spaces = this.state.spaces;
     var size = this.state.spaces.length;
@@ -63,9 +63,9 @@ var Tictactoe = React.createClass({
     var player2 = this.state.player2;
     var currentPlayer = this.state.currentPlayer;
     var gameOver = this.state.gameOver;
-    var updateSpace = this.state.updateSpace;
+    var updateSpace = this.updateSpace;
     var board = this.state.spaces.map(function(box, index) {
-      // In the map function, we're in the global scope so we have to sneak in 'this'
+      // In the map function, 'this' refers to the global scope (non-strict mode) so we have to sneak in 'this'
       var boxes = [];
       boxes.push(<Squares box = {box}
                           index={index} 

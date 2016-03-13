@@ -7,27 +7,27 @@ var routes = express.Router();
 var assetFolder = Path.resolve(__dirname, '../client');
 routes.use(express.static(assetFolder));
 
+function allValuesSame(array) {
+  var unplayed = 'img/tile.jpg';
+  for (var i = 1; i < array.length; i++) {
+    if (array[i] !== array[0] || array[i] === unplayed) {
+      return false;
+    }
+  }
+  return true;
+};
 
 routes.post('/pick', function(req, res) {
   // Supports NxN game board
   console.log("Req.body in server: ", req.body);
   var player1 = 'img/x.jpg', player2 = 'img/o.jpg', unplayed = 'img/tile.jpg', index = Number(req.body.index),
       board = req.body.board, dimension = Math.sqrt(req.body.board.length), size = req.body.board.length;
-  // Create a method on Array.prototype to help check for winning plays
-  Array.prototype.allValuesSame = function() {
-    for (var i = 1; i < this.length; i++) {
-      if (this[i] !== this[0] || this[i] === unplayed) {
-        return false;
-      }
-    }
-    return true;
-  };
   // Check for horizontal wins
   var y = 0;
   while (y < size) {
     var rowEnd = y + dimension;
     var row = board.slice(y, rowEnd);
-    if (row.allValuesSame()) {
+    if (allValuesSame(row)) {
       return res.sendStatus(202);
     }
     y += dimension;
@@ -39,7 +39,7 @@ routes.post('/pick', function(req, res) {
     for (var i = x; i < size; i += dimension) {
       column.push(board[i]);
     }
-    if (column.allValuesSame()) {
+    if (allValuesSame(column)) {
       return res.sendStatus(202);
     }
     x++;
@@ -50,7 +50,7 @@ routes.post('/pick', function(req, res) {
     diagonal.push(board[d]);
     d += dimension + 1;
   }
-  if (diagonal.allValuesSame()) {
+  if (allValuesSame(diagonal)) {
     return res.sendStatus(202);
   }
   // Check for antidiagonal wins
@@ -59,7 +59,7 @@ routes.post('/pick', function(req, res) {
     antidiagonal.push(board[ad]);
     ad += dimension - 1;
   }
-  if (antidiagonal.allValuesSame()) {
+  if (allValuesSame(antidiagonal)) {
     return res.sendStatus(202);
   }
   if (board.indexOf(unplayed) === -1) {
